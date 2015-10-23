@@ -44,7 +44,10 @@ public class DamageListener {
     public void onJoin(ClientConnectionEvent.Join joinEvent) {
         Player player = joinEvent.getTargetEntity();
         //everyone should have a global scoreboard to see the health from others
-        player.setScoreboard(globalScoreboard);
+        if (plugin.getConfig().isNametagHealth() || plugin.getConfig().isBelowNameHealth()) {
+            //don't override the old scoreboard if the feature isn't needed
+            player.setScoreboard(globalScoreboard);   
+        }
     }
 
     @Listener(ignoreCancelled = true)
@@ -128,6 +131,20 @@ public class DamageListener {
         Config config = plugin.getConfig();
         char displayChar = config.getDisplayChar();
 
+        TextColor highlightColor = getHealthColor(steps);
+
+        TextBuilder textBuilder = Texts.builder();
+        textBuilder.color(highlightColor);
+        for (int i = 0; i < percent; i++) {
+            textBuilder.append(Texts.of(displayChar));
+        }
+
+        textBuilder.append(Texts.of(TextColors.RESET));
+
+        return textBuilder.build();
+    }
+
+    private TextColor getHealthColor(int steps) {
         TextColor highlightColor;
         switch (steps) {
             case 1:
@@ -154,15 +171,7 @@ public class DamageListener {
                 highlightColor = TextColors.DARK_GREEN;
                 break;
         }
-
-        TextBuilder textBuilder = Texts.builder();
-        textBuilder.color(highlightColor);
-        for (int i = 0; i < percent; i++) {
-            textBuilder.append(Texts.of(displayChar));
-        }
-
-        textBuilder.append(Texts.of(TextColors.RESET));
-
-        return textBuilder.build();
+        
+        return highlightColor;
     }
 }
