@@ -11,12 +11,9 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.scoreboard.Scoreboard;
-import org.spongepowered.api.scoreboard.ScoreboardBuilder;
 import org.spongepowered.api.scoreboard.Team;
-import org.spongepowered.api.scoreboard.TeamBuilder;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.scoreboard.objective.Objective;
-import org.spongepowered.api.scoreboard.objective.ObjectiveBuilder;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.Texts;
@@ -31,12 +28,12 @@ public class DamageListener {
     public DamageListener(HealthName plugin) {
         this.plugin = plugin;
         this.globalScoreboard = plugin.getGame()
-                .getRegistry().createBuilder(ScoreboardBuilder.class)
+                .getRegistry().createBuilder(Scoreboard.Builder.class)
                 .build();
 
         if (plugin.getConfig().isBelowNameHealth()) {
             //since this is a global objective we need to create this just once
-            globalScoreboard.addObjective(plugin.getGame().getRegistry().createBuilder(ObjectiveBuilder.class)
+            globalScoreboard.addObjective(plugin.getGame().getRegistry().createBuilder(Objective.Builder.class)
                     .name(plugin.getContainer().getId())
                     .displayName(Texts.of(TextColors.DARK_RED, "Health"))
                     .build(), DisplaySlots.BELOW_NAME);
@@ -114,7 +111,7 @@ public class DamageListener {
             //player nametag prefix and suffix
             Optional<Team> optionalTeam = playerScoreboard.getTeam(playerName);
             if (!optionalTeam.isPresent()) {
-                playerScoreboard.addTeam(plugin.getGame().getRegistry().createBuilder(TeamBuilder.class)
+                playerScoreboard.addTeam(plugin.getGame().getRegistry().createBuilder(Team.Builder.class)
                         .name(playerName)
                         .color(TextColors.DARK_RED)
                         .build());
