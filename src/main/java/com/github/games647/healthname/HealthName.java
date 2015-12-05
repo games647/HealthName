@@ -11,12 +11,12 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.service.config.DefaultConfig;
 
 @Plugin(id = "healthname", name = "HealthName", version = "0.1")
 public class HealthName {
@@ -59,7 +59,7 @@ public class HealthName {
     public Settings getConfigManager() {
         return configuration;
     }
-    
+
     public Config getConfig() {
         return configuration.getConfiguration();
     }

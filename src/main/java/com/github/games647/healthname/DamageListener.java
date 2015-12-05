@@ -27,13 +27,11 @@ public class DamageListener {
 
     public DamageListener(HealthName plugin) {
         this.plugin = plugin;
-        this.globalScoreboard = plugin.getGame()
-                .getRegistry().createBuilder(Scoreboard.Builder.class)
-                .build();
+        this.globalScoreboard = Scoreboard.builder().build();
 
         if (plugin.getConfig().isBelowNameHealth()) {
             //since this is a global objective we need to create this just once
-            globalScoreboard.addObjective(plugin.getGame().getRegistry().createBuilder(Objective.Builder.class)
+            globalScoreboard.addObjective(Objective.builder()
                     .name(plugin.getContainer().getId())
                     .displayName(Texts.of(TextColors.DARK_RED, "Health"))
                     .build(), DisplaySlots.BELOW_NAME);
