@@ -38,7 +38,7 @@ public class DamageListener {
         }
     }
 
-    @Listener(ignoreCancelled = true)
+    @Listener
     public void onJoin(ClientConnectionEvent.Join joinEvent) {
         Player player = joinEvent.getTargetEntity();
         //everyone should have a global scoreboard to see the health from others
@@ -48,7 +48,7 @@ public class DamageListener {
         }
     }
 
-    @Listener(ignoreCancelled = true)
+    @Listener
     public void onQuit(ClientConnectionEvent.Disconnect disconnectEvent) {
         String playerName = disconnectEvent.getTargetEntity().getName();
         //Clean up scoreboard in order to prevent to big ones
@@ -59,10 +59,8 @@ public class DamageListener {
         }
     }
 
-    @Listener(ignoreCancelled = true)
+    @Listener
     public void onEntityDamage(DamageEntityEvent damageEntityEvent) {
-        plugin.getLogger().debug("DAMAGE EVENT");
-
         Entity targetEntity = damageEntityEvent.getTargetEntity();
         Optional<Double> optionalHealth = targetEntity.get(Keys.HEALTH);
         Optional<Double> optionalMaxHealth = targetEntity.get(Keys.MAX_HEALTH);
