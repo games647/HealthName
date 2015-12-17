@@ -18,7 +18,7 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 
-@Plugin(id = "healthname", name = "HealthName", version = "0.1")
+@Plugin(id = "healthname", name = "HealthName", version = "0.1.1")
 public class HealthName {
 
     private final PluginContainer pluginContainer;
@@ -53,7 +53,7 @@ public class HealthName {
     @Listener //During this state, the plugin should finish any work needed in order to be functional. Commands register + events
     public void onInit(GameInitializationEvent initEvent) {
         //register events
-        initEvent.getGame().getEventManager().registerListeners(this, new DamageListener(this));
+        game.getEventManager().registerListeners(this, new DamageListener(this));
     }
 
     public Settings getConfigManager() {
