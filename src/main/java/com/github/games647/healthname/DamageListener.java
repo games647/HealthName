@@ -18,8 +18,6 @@ import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TextBuilder;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -35,7 +33,7 @@ public class DamageListener {
         if (plugin.getConfig().isBelowNameHealth()) {
             Objective objective = Objective.builder()
                     .name(plugin.getContainer().getId())
-                    .displayName(Texts.of(TextColors.DARK_RED, "Health"))
+                    .displayName(Text.of(TextColors.DARK_RED, "Health"))
                     .criterion(Criteria.DUMMY)
                     .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)
                     .build();
@@ -58,7 +56,7 @@ public class DamageListener {
     public void onQuit(ClientConnectionEvent.Disconnect disconnectEvent) {
         String playerName = disconnectEvent.getTargetEntity().getName();
         //Clean up scoreboard in order to prevent to big ones
-        globalScoreboard.removeScores(Texts.of(playerName));
+        globalScoreboard.removeScores(Text.of(playerName));
         Optional<Team> optionalTeam = globalScoreboard.getTeam(playerName);
         if (optionalTeam.isPresent()) {
             Team team = optionalTeam.get();
@@ -103,7 +101,7 @@ public class DamageListener {
                 if (objective.getName().equals(plugin.getContainer().getId())) {
                     //we don't want to override other scoreboards
                     int displayedHealth = (int) Math.ceil(currentHealth);
-                    objective.getOrCreateScore(Texts.of(playerName)).setScore(displayedHealth);
+                    objective.getOrCreateScore(Text.of(playerName)).setScore(displayedHealth);
                 }
             }
         }
@@ -136,13 +134,13 @@ public class DamageListener {
 
         TextColor highlightColor = getHealthColor(steps);
 
-        TextBuilder textBuilder = Texts.builder();
+        Text.Builder textBuilder = Text.builder();
         textBuilder.color(highlightColor);
         for (int i = 0; i < percent; i++) {
-            textBuilder.append(Texts.of(displayChar));
+            textBuilder.append(Text.of(displayChar));
         }
 
-        textBuilder.append(Texts.of(TextColors.RESET));
+        textBuilder.append(Text.of(TextColors.RESET));
 
         return textBuilder.build();
     }
