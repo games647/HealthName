@@ -3,6 +3,7 @@ package com.github.games647.healthname;
 import com.github.games647.healthname.config.Config;
 
 import java.util.Optional;
+import org.spongepowered.api.Sponge;
 
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
@@ -12,8 +13,10 @@ import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
+import org.spongepowered.api.scoreboard.critieria.Criteria;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.scoreboard.objective.Objective;
+import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.Texts;
@@ -27,14 +30,17 @@ public class DamageListener {
 
     public DamageListener(HealthName plugin) {
         this.plugin = plugin;
-        this.globalScoreboard = Scoreboard.builder().build();
+        this.globalScoreboard = Sponge.getServer().getServerScoreboard().get();
 
         if (plugin.getConfig().isBelowNameHealth()) {
-            //since this is a global objective we need to create this just once
-            globalScoreboard.addObjective(Objective.builder()
+            Objective objective = Objective.builder()
                     .name(plugin.getContainer().getId())
                     .displayName(Texts.of(TextColors.DARK_RED, "Health"))
-                    .build(), DisplaySlots.BELOW_NAME);
+                    .criterion(Criteria.DUMMY)
+                    .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)
+                    .build();
+            globalScoreboard.addObjective(objective);
+            globalScoreboard.updateDisplaySlot(objective, DisplaySlots.BELOW_NAME);
         }
     }
 
@@ -55,7 +61,8 @@ public class DamageListener {
         globalScoreboard.removeScores(Texts.of(playerName));
         Optional<Team> optionalTeam = globalScoreboard.getTeam(playerName);
         if (optionalTeam.isPresent()) {
-            globalScoreboard.removeTeam(optionalTeam.get());
+            Team team = optionalTeam.get();
+            team.unregister();
         }
     }
 
@@ -96,7 +103,7 @@ public class DamageListener {
                 if (objective.getName().equals(plugin.getContainer().getId())) {
                     //we don't want to override other scoreboards
                     int displayedHealth = (int) Math.ceil(currentHealth);
-                    objective.getScore(Texts.of(playerName)).setScore(displayedHealth);
+                    objective.getOrCreateScore(Texts.of(playerName)).setScore(displayedHealth);
                 }
             }
         }
@@ -107,7 +114,7 @@ public class DamageListener {
             //player nametag prefix and suffix
             Optional<Team> optionalTeam = playerScoreboard.getTeam(playerName);
             if (!optionalTeam.isPresent()) {
-                playerScoreboard.addTeam(plugin.getGame().getRegistry().createBuilder(Team.Builder.class)
+                playerScoreboard.registerTeam(plugin.getGame().getRegistry().createBuilder(Team.Builder.class)
                         .name(playerName)
                         .color(TextColors.DARK_RED)
                         .build());

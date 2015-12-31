@@ -18,7 +18,7 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 
-@Plugin(id = "healthname", name = "HealthName", version = "0.1.1")
+@Plugin(id = "healthname", name = "HealthName", version = "0.1.2")
 public class HealthName {
 
     private final PluginContainer pluginContainer;
