@@ -5,8 +5,6 @@
 A Sponge minecraft server plugin for displaying the health above an entity.
 This plugins makes it possible to display player or mob health above their character.
 
-Attention: The plugin doesn't work yet. The DamageEvent from the SpongeAPI isn't implemented yet in the Sponge implementation.
-
 Tested against:
 
 	Sponge: sponge-1.8-1521-2.1-DEV-748
