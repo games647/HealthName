@@ -15,15 +15,25 @@ import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scoreboard.Scoreboard;
+import org.spongepowered.api.scoreboard.critieria.Criteria;
+import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
+import org.spongepowered.api.scoreboard.objective.Objective;
+import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
-@Plugin(id = "healthname", name = "HealthName", version = "0.1.2")
+@Plugin(id = "healthname", name = "HealthName", version = "0.2")
 public class HealthName {
 
     private final PluginContainer pluginContainer;
     private final Logger logger;
     private final Game game;
+
+    private Scoreboard globalScoreboard;
 
     @Inject
     @DefaultConfig(sharedRoot = true)
@@ -54,6 +64,31 @@ public class HealthName {
     public void onInit(GameInitializationEvent initEvent) {
         //register events
         game.getEventManager().registerListeners(this, new DamageListener(this));
+    }
+
+    @Listener
+    public void onGameStarted(GameStartedServerEvent gameStartedServerEvent) {
+        //Scoreboards are loaded when the world is loaded so load it here
+        if (getConfig().isNametagHealth()) {
+            Objective objective = globalScoreboard.getObjective(pluginContainer.getId()).orElse(null);
+            if (objective != null) {
+                //clear all old values
+                globalScoreboard.removeObjective(objective);
+            }
+
+            objective = Objective.builder()
+                    .name(pluginContainer.getId())
+                    .displayName(Text.of(TextColors.DARK_RED, "Health"))
+                    .criterion(Criteria.DUMMY)
+                    .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)
+                    .build();
+            globalScoreboard.addObjective(objective);
+            globalScoreboard.updateDisplaySlot(objective, DisplaySlots.BELOW_NAME);
+        }
+    }
+
+    public Scoreboard getGlobalScoreboard() {
+        return globalScoreboard;
     }
 
     public Settings getConfigManager() {

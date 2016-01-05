@@ -1,6 +1,7 @@
 package com.github.games647.healthname.config;
 
 import com.github.games647.healthname.HealthName;
+import com.github.games647.healthname.config.Config;
 
 import java.io.File;
 import java.io.IOException;

@@ -3,20 +3,18 @@ package com.github.games647.healthname;
 import com.github.games647.healthname.config.Config;
 
 import java.util.Optional;
-import org.spongepowered.api.Sponge;
 
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
-import org.spongepowered.api.scoreboard.critieria.Criteria;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.scoreboard.objective.Objective;
-import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
@@ -24,22 +22,9 @@ import org.spongepowered.api.text.format.TextColors;
 public class DamageListener {
 
     private final HealthName plugin;
-    private final Scoreboard globalScoreboard;
 
     public DamageListener(HealthName plugin) {
         this.plugin = plugin;
-        this.globalScoreboard = Sponge.getServer().getServerScoreboard().get();
-
-        if (plugin.getConfig().isBelowNameHealth()) {
-            Objective objective = Objective.builder()
-                    .name(plugin.getContainer().getId())
-                    .displayName(Text.of(TextColors.DARK_RED, "Health"))
-                    .criterion(Criteria.DUMMY)
-                    .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)
-                    .build();
-            globalScoreboard.addObjective(objective);
-            globalScoreboard.updateDisplaySlot(objective, DisplaySlots.BELOW_NAME);
-        }
     }
 
     @Listener
@@ -48,7 +33,7 @@ public class DamageListener {
         //everyone should have a global scoreboard to see the health from others
         if (plugin.getConfig().isNametagHealth() || plugin.getConfig().isBelowNameHealth()) {
             //don't override the old scoreboard if the feature isn't needed
-            player.setScoreboard(globalScoreboard);
+            player.setScoreboard(plugin.getGlobalScoreboard());
         }
     }
 
@@ -56,8 +41,8 @@ public class DamageListener {
     public void onQuit(ClientConnectionEvent.Disconnect disconnectEvent) {
         String playerName = disconnectEvent.getTargetEntity().getName();
         //Clean up scoreboard in order to prevent to big ones
-        globalScoreboard.removeScores(Text.of(playerName));
-        Optional<Team> optionalTeam = globalScoreboard.getTeam(playerName);
+        plugin.getGlobalScoreboard().removeScores(Text.of(playerName));
+        Optional<Team> optionalTeam = plugin.getGlobalScoreboard().getTeam(playerName);
         if (optionalTeam.isPresent()) {
             Team team = optionalTeam.get();
             team.unregister();
@@ -70,24 +55,24 @@ public class DamageListener {
         Optional<Double> optionalHealth = targetEntity.get(Keys.HEALTH);
         Optional<Double> optionalMaxHealth = targetEntity.get(Keys.MAX_HEALTH);
         if (optionalHealth.isPresent() && optionalMaxHealth.isPresent()) {
-            double currentHealth = optionalHealth.get();
             double maxHealth = optionalMaxHealth.get();
+            double currentHealth = optionalHealth.get() - damageEntityEvent.getFinalDamage();
 
             Text healthMessage = generateHealthMessage(currentHealth, maxHealth);
-            if (plugin.getConfig().isEnabledMob() && targetEntity.supports(Keys.DISPLAY_NAME)) {
-                //mobs have only support for this
-                targetEntity.offer(Keys.DISPLAY_NAME, healthMessage);
-            } else if (targetEntity instanceof Player) {
+            if (targetEntity.getType() == EntityTypes.PLAYER) {
                 Player targetPlayer = (Player) targetEntity;
                 String playerName = targetPlayer.getName();
 
                 Scoreboard playerScoreboard = targetPlayer.getScoreboard();
-                if (globalScoreboard.equals(playerScoreboard)) {
+                if (plugin.getGlobalScoreboard().equals(playerScoreboard)) {
                     //does the player have still a global scoreboard -> we don't want to overrid eothers
                     setBelownameHealth(playerScoreboard, currentHealth, playerName);
 
                     setNametagHealth(playerScoreboard, playerName, healthMessage);
                 }
+            } else if (plugin.getConfig().isEnabledMob() && targetEntity.supports(Keys.DISPLAY_NAME)) {
+                //mobs have only support for this
+                targetEntity.offer(Keys.DISPLAY_NAME, healthMessage);
             }
         }
     }
@@ -114,11 +99,11 @@ public class DamageListener {
             if (!optionalTeam.isPresent()) {
                 playerScoreboard.registerTeam(plugin.getGame().getRegistry().createBuilder(Team.Builder.class)
                         .name(playerName)
-                        .color(TextColors.DARK_RED)
                         .build());
             }
 
-            Team team = optionalTeam.get();
+            Team team = playerScoreboard.getTeam(playerName).get();
+            team.addMember(Text.of(playerName));
             team.setPrefix(healthMessage);
             team.setSuffix(healthMessage);
         }
@@ -135,12 +120,14 @@ public class DamageListener {
         TextColor highlightColor = getHealthColor(steps);
 
         Text.Builder textBuilder = Text.builder();
-        textBuilder.color(highlightColor);
-        for (int i = 0; i < percent; i++) {
-            textBuilder.append(Text.of(displayChar));
+        for (int i = 0; i < percent / 10; i++) {
+            textBuilder.append(Text
+                    .builder(displayChar)
+                    .color(highlightColor)
+                    .build());
         }
 
-        textBuilder.append(Text.of(TextColors.RESET));
+        textBuilder.append(Text.builder().color(TextColors.RESET).build());
 
         return textBuilder.build();
     }

@@ -15,10 +15,20 @@ Tested against:
 
 ### Config
     # Show health bar above mobs
-    enabledMob=totp
+    enabledMob=true
     # Show the health of a player besides his nametag
-    nametagHealth=true
+    nametagHealth=false
     # Show the health of a player under his nametag (only the health number)
-    belowNameHealth=true
+    belowNameHealth=false
     # What character should be used to display the health
     displayChar='|'
+
+### Screenshots
+
+Mob health
+
+![Sheep with healthbar](http://i.imgur.com/FMy2tTa.png)
+
+Player health with nametag and belowName options enabled
+
+![Player healthbar](http://i.imgur.com/4ZX7D4O.png)
