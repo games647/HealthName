@@ -10,7 +10,7 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
-import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.event.entity.HealEntityEvent;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
@@ -28,24 +28,13 @@ public class DamageListener {
     }
 
     @Listener
-    public void onJoin(ClientConnectionEvent.Join joinEvent) {
-        Player player = joinEvent.getTargetEntity();
-        //everyone should have a global scoreboard to see the health from others
-        if (plugin.getConfig().isNametagHealth() || plugin.getConfig().isBelowNameHealth()) {
-            //don't override the old scoreboard if the feature isn't needed
-            player.setScoreboard(plugin.getGlobalScoreboard());
-        }
-    }
-
-    @Listener
-    public void onQuit(ClientConnectionEvent.Disconnect disconnectEvent) {
-        String playerName = disconnectEvent.getTargetEntity().getName();
-        //Clean up scoreboard in order to prevent to big ones
-        plugin.getGlobalScoreboard().removeScores(Text.of(playerName));
-        Optional<Team> optionalTeam = plugin.getGlobalScoreboard().getTeam(playerName);
-        if (optionalTeam.isPresent()) {
-            Team team = optionalTeam.get();
-            team.unregister();
+    public void onHeal(HealEntityEvent healEvent) {
+        Entity targetEntity = healEvent.getTargetEntity();
+        Optional<Double> optionalHealth = targetEntity.get(Keys.HEALTH);
+        Optional<Double> optionalMaxHealth = targetEntity.get(Keys.MAX_HEALTH);
+        if (optionalHealth.isPresent() && optionalMaxHealth.isPresent()) {
+            double newHealth = optionalHealth.get() + healEvent.getFinalHealAmount();
+            updateHealth(optionalMaxHealth.get(), newHealth, targetEntity);
         }
     }
 
@@ -55,25 +44,27 @@ public class DamageListener {
         Optional<Double> optionalHealth = targetEntity.get(Keys.HEALTH);
         Optional<Double> optionalMaxHealth = targetEntity.get(Keys.MAX_HEALTH);
         if (optionalHealth.isPresent() && optionalMaxHealth.isPresent()) {
-            double maxHealth = optionalMaxHealth.get();
-            double currentHealth = optionalHealth.get() - damageEntityEvent.getFinalDamage();
+            double newHealth = optionalHealth.get() - damageEntityEvent.getFinalDamage();
+            updateHealth(optionalMaxHealth.get(), newHealth, targetEntity);
+        }
+    }
 
-            Text healthMessage = generateHealthMessage(currentHealth, maxHealth);
-            if (targetEntity.getType() == EntityTypes.PLAYER) {
-                Player targetPlayer = (Player) targetEntity;
-                String playerName = targetPlayer.getName();
+    private void updateHealth(double maxHealth, double newHealth, Entity targetEntity) {
+        Text healthMessage = generateHealthMessage(newHealth, maxHealth);
+        if (targetEntity.getType() == EntityTypes.PLAYER) {
+            Player targetPlayer = (Player) targetEntity;
+            String playerName = targetPlayer.getName();
 
-                Scoreboard playerScoreboard = targetPlayer.getScoreboard();
-                if (plugin.getGlobalScoreboard().equals(playerScoreboard)) {
-                    //does the player have still a global scoreboard -> we don't want to overrid eothers
-                    setBelownameHealth(playerScoreboard, currentHealth, playerName);
+            Scoreboard playerScoreboard = targetPlayer.getScoreboard();
+            if (plugin.getGlobalScoreboard().equals(playerScoreboard)) {
+                //does the player have still a global scoreboard -> we don't want to overrid eothers
+                setBelownameHealth(playerScoreboard, newHealth, playerName);
 
-                    setNametagHealth(playerScoreboard, playerName, healthMessage);
-                }
-            } else if (plugin.getConfig().isEnabledMob() && targetEntity.supports(Keys.DISPLAY_NAME)) {
-                //mobs have only support for this
-                targetEntity.offer(Keys.DISPLAY_NAME, healthMessage);
+                setNametagHealth(playerScoreboard, playerName, healthMessage);
             }
+        } else if (plugin.getConfig().isEnabledMob() && targetEntity.supports(Keys.DISPLAY_NAME)) {
+            //mobs have only support for this
+            targetEntity.offer(Keys.DISPLAY_NAME, healthMessage);
         }
     }
 

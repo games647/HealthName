@@ -1,4 +1,4 @@
-# HealhName
+# HealthName
 
 ### Description
 

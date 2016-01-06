@@ -64,6 +64,7 @@ public class HealthName {
     public void onInit(GameInitializationEvent initEvent) {
         //register events
         game.getEventManager().registerListeners(this, new DamageListener(this));
+        game.getEventManager().registerListeners(this, new ConnectionListener(this));
     }
 
     @Listener
