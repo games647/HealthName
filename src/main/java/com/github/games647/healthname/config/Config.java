@@ -16,7 +16,7 @@ public class Config {
     private boolean belowNameHealth = true;
 
     @Setting(comment = "What character should be used to display the health")
-    private char displayChar = '|';
+    private String displayChar = "|";
 
     public boolean isEnabledMob() {
         return enabledMob;
@@ -31,6 +31,6 @@ public class Config {
     }
 
     public char getDisplayChar() {
-        return displayChar;
+        return displayChar.charAt(0);
     }
 }
