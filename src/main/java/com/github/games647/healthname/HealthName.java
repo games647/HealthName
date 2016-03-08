@@ -6,6 +6,8 @@ import com.google.inject.Inject;
 
 import java.io.File;
 
+import me.flibio.updatifier.Updatifier;
+
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
@@ -26,7 +28,8 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-@Plugin(id = "healthname", name = "HealthName", version = "0.2")
+@Updatifier(repoOwner = "games647", repoName = "HealthName", version = "0.2.1")
+@Plugin(id = "healthname", name = "HealthName", version = "0.2.1")
 public class HealthName {
 
     private final PluginContainer pluginContainer;
