@@ -29,7 +29,9 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 @Updatifier(repoOwner = "games647", repoName = "HealthName", version = "0.2.1")
-@Plugin(id = "healthname", name = "HealthName", version = "0.2.1")
+@Plugin(id = "com.github.games647.healthname", name = "HealthName", version = "0.2.1"
+        , url = "https://github.com/games647/HealthName"
+        , description = "A Sponge minecraft server plugin for displaying the health above an entity.")
 public class HealthName {
 
     private final PluginContainer pluginContainer;
