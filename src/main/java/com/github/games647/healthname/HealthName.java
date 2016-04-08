@@ -28,8 +28,8 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-@Updatifier(repoOwner = "games647", repoName = "HealthName", version = "0.2.1")
-@Plugin(id = "com.github.games647.healthname", name = "HealthName", version = "0.2.1"
+@Updatifier(repoOwner = "games647", repoName = "HealthName", version = "0.2.2")
+@Plugin(id = "com.github.games647.healthname", name = "HealthName", version = "0.2.2"
         , url = "https://github.com/games647/HealthName"
         , description = "A Sponge minecraft server plugin for displaying the health above an entity.")
 public class HealthName {
@@ -76,14 +76,14 @@ public class HealthName {
     public void onGameStarted(GameStartedServerEvent gameStartedServerEvent) {
         //Scoreboards are loaded when the world is loaded so load it here
         if (getConfig().isNametagHealth()) {
-            Objective objective = globalScoreboard.getObjective(pluginContainer.getId()).orElse(null);
+            Objective objective = globalScoreboard.getObjective(pluginContainer.getUnqualifiedId()).orElse(null);
             if (objective != null) {
                 //clear all old values
                 globalScoreboard.removeObjective(objective);
             }
 
             objective = Objective.builder()
-                    .name(pluginContainer.getId())
+                    .name(pluginContainer.getUnqualifiedId())
                     .displayName(Text.of(TextColors.DARK_RED, "Health"))
                     .criterion(Criteria.DUMMY)
                     .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)

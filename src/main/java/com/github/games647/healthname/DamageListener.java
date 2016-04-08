@@ -74,7 +74,7 @@ public class DamageListener {
             if (optionalObjective.isPresent()) {
                 //make sure we are targeting our own objective on the correct display slot
                 Objective objective = optionalObjective.get();
-                if (objective.getName().equals(plugin.getContainer().getId())) {
+                if (objective.getName().equals(plugin.getContainer().getUnqualifiedId())) {
                     //we don't want to override other scoreboards
                     int displayedHealth = (int) Math.ceil(currentHealth);
                     objective.getOrCreateScore(Text.of(playerName)).setScore(displayedHealth);
