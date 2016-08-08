@@ -28,8 +28,8 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-@Updatifier(repoOwner = "games647", repoName = "HealthName", version = "0.2.3")
-@Plugin(id = "healthname", name = "HealthName", version = "0.2.3"
+@Updatifier(repoOwner = "games647", repoName = "HealthName", version = "0.2.4")
+@Plugin(id = "healthname", name = "HealthName", version = "0.2.4"
         , url = "https://github.com/games647/HealthName"
         , description = "A Sponge minecraft server plugin for displaying the health above an entity.")
 public class HealthName {

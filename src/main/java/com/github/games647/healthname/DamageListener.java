@@ -1,21 +1,24 @@
 package com.github.games647.healthname;
 
-import com.github.games647.healthname.config.Config;
 
 import java.util.Optional;
 
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.HealEntityEvent;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.scoreboard.objective.Objective;
+import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Text.Builder;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -46,6 +49,44 @@ public class DamageListener {
         if (optionalHealth.isPresent() && optionalMaxHealth.isPresent()) {
             double newHealth = optionalHealth.get() - damageEntityEvent.getFinalDamage();
             updateHealth(optionalMaxHealth.get(), newHealth, targetEntity);
+        }
+    }
+
+    @Listener
+    public void onEntityDeath(DestructEntityEvent.Death deathEntityEvent) {
+        Living targetEntity = deathEntityEvent.getTargetEntity();
+
+        if (!deathEntityEvent.isMessageCancelled()) {
+            //clear entity properties
+            if (targetEntity.getType() == EntityTypes.PLAYER) {
+                Player targetPlayer = (Player) targetEntity;
+                Scoreboard playerScoreboard = targetPlayer.getScoreboard();
+
+                String playerName = targetPlayer.getName();
+
+                Optional<Team> optionalTeam = playerScoreboard.getTeam(playerName);
+                if (optionalTeam.isPresent()) {
+                    optionalTeam.get().unregister();
+                }
+            } else if (targetEntity.supports(Keys.DISPLAY_NAME)) {
+                targetEntity.remove(Keys.DISPLAY_NAME);
+            }
+
+            //clean message
+            Text oldMessage = deathEntityEvent.getMessage();
+            Builder newMessageBuilder = Text.builder(oldMessage, "");
+            for (Text child : oldMessage.getChildren()) {
+                if (child instanceof LiteralText) {
+                    String content = ((LiteralText) child).getContent();
+                    String newContent = content.replace(plugin.getConfig().getDisplayChar() + "", "");
+                    newMessageBuilder.append(Text.builder(child, newContent).build());
+                    continue;
+                }
+                
+                newMessageBuilder.append(child);
+            }
+
+            deathEntityEvent.setMessage(newMessageBuilder.build());
         }
     }
 
@@ -105,8 +146,7 @@ public class DamageListener {
         //10-steps -> 1=10% 2=20% 3=30%
         int steps = (int) Math.ceil(percent / 10);
 
-        Config config = plugin.getConfig();
-        char displayChar = config.getDisplayChar();
+        char displayChar = plugin.getConfig().getDisplayChar();
 
         TextColor highlightColor = getHealthColor(steps);
 
