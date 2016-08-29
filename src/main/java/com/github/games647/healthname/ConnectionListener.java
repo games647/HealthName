@@ -1,7 +1,6 @@
 package com.github.games647.healthname;
 
 import com.github.games647.healthname.HealthName;
-import java.util.Optional;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
@@ -31,10 +30,6 @@ public class ConnectionListener {
         String playerName = disconnectEvent.getTargetEntity().getName();
         //Clean up scoreboard in order to prevent to big ones
         plugin.getGlobalScoreboard().removeScores(Text.of(playerName));
-        Optional<Team> optionalTeam = plugin.getGlobalScoreboard().getTeam(playerName);
-        if (optionalTeam.isPresent()) {
-            Team team = optionalTeam.get();
-            team.unregister();
-        }
+        plugin.getGlobalScoreboard().getTeam(playerName).ifPresent(Team::unregister);
     }
 }

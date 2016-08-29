@@ -9,7 +9,7 @@
     <packaging>jar</packaging>
 
     <name>HealthName</name>
-    <version>0.2.4</version>
+    <version>0.2.5</version>
     <description>Sponge plugin that displays the health of a mob or player above their head</description>
     <url>https://github.com/games647/HealthName</url>
 
@@ -82,11 +82,6 @@
             <id>sponge-repo</id>
             <url>http://repo.spongepowered.org/maven</url>
         </repository>
-
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -94,15 +89,9 @@
         <dependency>
             <groupId>org.spongepowered</groupId>
             <artifactId>spongeapi</artifactId>
-            <version>4.2.0-SNAPSHOT</version>
+            <version>5.0.0-SNAPSHOT</version>
             <type>jar</type>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.Flibio</groupId>
-            <artifactId>Updatifier</artifactId>
-            <version>v1.3.0</version>
         </dependency>
     </dependencies>
 </project>

@@ -63,11 +63,7 @@ public class DamageListener {
                 Scoreboard playerScoreboard = targetPlayer.getScoreboard();
 
                 String playerName = targetPlayer.getName();
-
-                Optional<Team> optionalTeam = playerScoreboard.getTeam(playerName);
-                if (optionalTeam.isPresent()) {
-                    optionalTeam.get().unregister();
-                }
+                playerScoreboard.getTeam(playerName).ifPresent(Team::unregister);
             } else if (targetEntity.supports(Keys.DISPLAY_NAME)) {
                 targetEntity.remove(Keys.DISPLAY_NAME);
             }

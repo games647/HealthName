@@ -76,13 +76,9 @@ public class HealthName {
 
         //Scoreboards are loaded when the world is loaded so load it here
         if (getConfig().isNametagHealth()) {
-            Objective objective = globalScoreboard.getObjective(pluginContainer.getId()).orElse(null);
-            if (objective != null) {
-                //clear all old values
-                globalScoreboard.removeObjective(objective);
-            }
+            globalScoreboard.getObjective(pluginContainer.getId()).ifPresent(globalScoreboard::removeObjective);
 
-            objective = Objective.builder()
+            Objective objective = Objective.builder()
                     .name(pluginContainer.getId())
                     .displayName(Text.of(TextColors.DARK_RED, "Health"))
                     .criterion(Criteria.DUMMY)
