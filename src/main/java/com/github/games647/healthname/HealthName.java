@@ -6,8 +6,6 @@ import com.google.inject.Inject;
 
 import java.io.File;
 
-import me.flibio.updatifier.Updatifier;
-
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 
@@ -18,6 +16,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -28,8 +27,7 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-@Updatifier(repoOwner = "games647", repoName = "HealthName", version = "0.2.4")
-@Plugin(id = "healthname", name = "HealthName", version = "0.2.4"
+@Plugin(id = "healthname", name = "HealthName", version = "0.2.5"
         , url = "https://github.com/games647/HealthName"
         , description = "A Sponge minecraft server plugin for displaying the health above an entity.")
 public class HealthName {
@@ -92,6 +90,13 @@ public class HealthName {
                     .build();
             globalScoreboard.addObjective(objective);
             globalScoreboard.updateDisplaySlot(objective, DisplaySlots.BELOW_NAME);
+        }
+    }
+
+    @Listener
+    public void onGameStarted(GameStoppingServerEvent gameStoppingServerEvent) {
+        if (globalScoreboard != null) {
+            globalScoreboard.getObjective(pluginContainer.getId()).ifPresent(globalScoreboard::removeObjective);
         }
     }
 
