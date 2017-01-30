@@ -9,7 +9,7 @@
     <packaging>jar</packaging>
 
     <name>HealthName</name>
-    <version>0.2.5</version>
+    <version>0.3</version>
     <description>Sponge plugin that displays the health of a mob or player above their head</description>
     <url>https://github.com/games647/HealthName</url>
 
@@ -46,7 +46,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -89,7 +89,7 @@
         <dependency>
             <groupId>org.spongepowered</groupId>
             <artifactId>spongeapi</artifactId>
-            <version>6.0.0-SNAPSHOT</version>
+            <version>5.0.0</version>
             <type>jar</type>
             <scope>provided</scope>
         </dependency>

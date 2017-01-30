@@ -1,6 +1,5 @@
 package com.github.games647.healthname;
 
-
 import java.util.Optional;
 
 import org.spongepowered.api.data.key.Keys;

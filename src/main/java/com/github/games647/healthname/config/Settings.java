@@ -1,10 +1,10 @@
 package com.github.games647.healthname.config;
 
 import com.github.games647.healthname.HealthName;
-import com.github.games647.healthname.config.Config;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -14,7 +14,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 public class Settings {
 
     private final ConfigurationLoader<CommentedConfigurationNode> configManager;
-    private final File defaultConfigFile;
+    private final Path defaultConfigFile;
 
     private final HealthName plugin;
 
@@ -22,7 +22,7 @@ public class Settings {
     private CommentedConfigurationNode rootNode;
 
     public Settings(ConfigurationLoader<CommentedConfigurationNode> configManager
-            , File defaultConfigFile, HealthName plugin) {
+            , Path defaultConfigFile, HealthName plugin) {
         this.configManager = configManager;
         this.plugin = plugin;
         this.defaultConfigFile = defaultConfigFile;
@@ -35,9 +35,9 @@ public class Settings {
     }
 
     public void load() {
-        if (!defaultConfigFile.exists()) {
+        if (Files.notExists(defaultConfigFile)) {
             try {
-                defaultConfigFile.createNewFile();
+                Files.createFile(defaultConfigFile);
             } catch (IOException ioExc) {
                 plugin.getLogger().error("Error creating a new config file", ioExc);
                 return;

@@ -4,7 +4,7 @@ import com.github.games647.healthname.config.Config;
 import com.github.games647.healthname.config.Settings;
 import com.google.inject.Inject;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -40,7 +40,7 @@ public class HealthName {
 
     @Inject
     @DefaultConfig(sharedRoot = true)
-    private File defaultConfigFile;
+    private Path defaultConfigFile;
 
     @Inject
     @DefaultConfig(sharedRoot = true)
