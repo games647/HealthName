@@ -15,30 +15,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <outputDir>${basedir}/target</outputDir>
     </properties>
 
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/games647/HealthName/issues</url>
-    </issueManagement>
-
-    <scm>
-        <url>https://github.com/games647/HealthName</url>
-        <connection>scm:git:git://github.com/games647/HealthName.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:games647/HealthName.git</developerConnection>
-    </scm>
-
-    <licenses>
-        <license>
-            <name>The MIT License</name>
-            <url>http://opensource.org/licenses/MIT</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
     <build>
-        <defaultGoal>install</defaultGoal>
         <!--Just use the project name to replace an old version of the plugin if the user does only copy-paste-->
         <finalName>${project.name}</finalName>
 
@@ -56,12 +35,17 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration>
-                    <outputDirectory>${outputDir}</outputDirectory>
-                </configuration>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>templating-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <id>filter-src</id>
+                        <goals>
+                            <goal>filter-sources</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
 
