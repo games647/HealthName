@@ -1,7 +1,11 @@
 package com.github.games647.healthname;
 
+import com.github.games647.healthname.config.Settings;
+import com.google.inject.Inject;
+
 import java.util.Optional;
 
+import org.spongepowered.api.Server;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
@@ -23,10 +27,13 @@ import org.spongepowered.api.text.format.TextColors;
 
 public class DamageListener {
 
-    private final HealthName plugin;
+    private final Settings settings;
+    private final Server server;
 
-    public DamageListener(HealthName plugin) {
-        this.plugin = plugin;
+    @Inject
+    DamageListener(Settings settings, Server server) {
+        this.settings = settings;
+        this.server = server;
     }
 
     @Listener
@@ -73,7 +80,7 @@ public class DamageListener {
             for (Text child : oldMessage.getChildren()) {
                 if (child instanceof LiteralText) {
                     String content = ((LiteralText) child).getContent();
-                    String newContent = content.replace(plugin.getConfig().getDisplayChar() + "", "");
+                    String newContent = content.replace(String.valueOf(settings.getConfig().getDisplayChar()), "");
                     newMessageBuilder.append(Text.builder(child, newContent).build());
                     continue;
                 }
@@ -92,44 +99,45 @@ public class DamageListener {
             String playerName = targetPlayer.getName();
 
             Scoreboard playerScoreboard = targetPlayer.getScoreboard();
-            if (plugin.getGlobalScoreboard().equals(playerScoreboard)) {
+            if (playerScoreboard.equals(server.getServerScoreboard().orElse(null))) {
                 //does the player have still a global scoreboard -> we don't want to overrid eothers
                 setBelownameHealth(playerScoreboard, newHealth, playerName);
 
                 setNametagHealth(playerScoreboard, playerName, healthMessage);
             }
-        } else if (plugin.getConfig().isEnabledMob() && targetEntity.supports(Keys.DISPLAY_NAME)) {
+        } else if (settings.getConfig().isEnabledMob() && targetEntity.supports(Keys.DISPLAY_NAME)) {
             //mobs have only support for this
             targetEntity.offer(Keys.DISPLAY_NAME, healthMessage);
         }
     }
 
     private void setBelownameHealth(Scoreboard playerScoreboard, double currentHealth, String playerName) {
-        if (plugin.getConfig().isBelowNameHealth()) {
+        if (settings.getConfig().isBelowNameHealth()) {
             Optional<Objective> optionalObjective = playerScoreboard.getObjective(DisplaySlots.BELOW_NAME);
-            if (optionalObjective.isPresent()) {
+            optionalObjective.ifPresent(objective -> {
                 //make sure we are targeting our own objective on the correct display slot
-                Objective objective = optionalObjective.get();
-                if (objective.getName().equals(plugin.getContainer().getId())) {
+                if (objective.getName().equals(PomData.ARTIFACT_ID)) {
                     //we don't want to override other scoreboards
                     int displayedHealth = (int) Math.ceil(currentHealth);
                     objective.getOrCreateScore(Text.of(playerName)).setScore(displayedHealth);
                 }
-            }
+            });
         }
     }
 
     private void setNametagHealth(Scoreboard playerScoreboard, String playerName, Text healthMessage) {
-        if (plugin.getConfig().isNametagHealth()) {
+        if (settings.getConfig().isNametagHealth()) {
             //player nametag prefix and suffix
+            Team team;
+
             Optional<Team> optionalTeam = playerScoreboard.getTeam(playerName);
-            if (!optionalTeam.isPresent()) {
-                playerScoreboard.registerTeam(plugin.getGame().getRegistry().createBuilder(Team.Builder.class)
-                        .name(playerName)
-                        .build());
+            if (optionalTeam.isPresent()) {
+                team = optionalTeam.get();
+            } else {
+                team = Team.builder().name(playerName).build();
+                playerScoreboard.registerTeam(team);
             }
 
-            Team team = playerScoreboard.getTeam(playerName).get();
             team.addMember(Text.of(playerName));
             team.setPrefix(healthMessage);
             team.setSuffix(healthMessage);
@@ -141,7 +149,7 @@ public class DamageListener {
         //10-steps -> 1=10% 2=20% 3=30%
         int steps = (int) Math.ceil(percent / 10);
 
-        char displayChar = plugin.getConfig().getDisplayChar();
+        char displayChar = settings.getConfig().getDisplayChar();
 
         TextColor highlightColor = getHealthColor(steps);
 

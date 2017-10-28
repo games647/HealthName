@@ -1,51 +1,40 @@
 package com.github.games647.healthname.config;
 
-import com.github.games647.healthname.HealthName;
+import com.google.inject.Inject;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMapper;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 
+import org.slf4j.Logger;
+import org.spongepowered.api.config.DefaultConfig;
+
 public class Settings {
 
+    private final Logger logger;
     private final ConfigurationLoader<CommentedConfigurationNode> configManager;
-    private final Path defaultConfigFile;
-
-    private final HealthName plugin;
 
     private ObjectMapper<Config>.BoundInstance configMapper;
-    private CommentedConfigurationNode rootNode;
 
-    public Settings(ConfigurationLoader<CommentedConfigurationNode> configManager
-            , Path defaultConfigFile, HealthName plugin) {
+    @Inject
+    Settings(Logger logger,
+             @DefaultConfig(sharedRoot = true) ConfigurationLoader<CommentedConfigurationNode> configManager) {
+        this.logger = logger;
         this.configManager = configManager;
-        this.plugin = plugin;
-        this.defaultConfigFile = defaultConfigFile;
 
         try {
             configMapper = ObjectMapper.forClass(Config.class).bindToNew();
         } catch (ObjectMappingException objMappingExc) {
-            plugin.getLogger().error("Invalid plugin structure", objMappingExc);
+            logger.error("Invalid plugin structure", objMappingExc);
         }
     }
 
     public void load() {
-        if (Files.notExists(defaultConfigFile)) {
-            try {
-                Files.createFile(defaultConfigFile);
-            } catch (IOException ioExc) {
-                plugin.getLogger().error("Error creating a new config file", ioExc);
-                return;
-            }
-        }
-
-        rootNode = configManager.createEmptyNode();
         if (configMapper != null) {
+            CommentedConfigurationNode rootNode;
             try {
                 rootNode = configManager.load();
 
@@ -56,27 +45,14 @@ public class Settings {
                 configMapper.serialize(rootNode);
                 configManager.save(rootNode);
             } catch (ObjectMappingException objMappingExc) {
-                plugin.getLogger().error("Error loading the configuration", objMappingExc);
+                logger.error("Error loading the configuration", objMappingExc);
             } catch (IOException ioExc) {
-                plugin.getLogger().error("Error saving the default configuration", ioExc);
+                logger.error("Error saving the default configuration", ioExc);
             }
         }
     }
 
-    public void save() {
-        if (configMapper != null && rootNode != null) {
-            try {
-                configMapper.serialize(rootNode);
-                configManager.save(rootNode);
-            } catch (ObjectMappingException objMappingExc) {
-                plugin.getLogger().error("Error serialize the configuration", objMappingExc);
-            } catch (IOException ioExc) {
-                plugin.getLogger().error("Error saving the configuration", ioExc);
-            }
-        }
-    }
-
-    public Config getConfiguration() {
+    public Config getConfig() {
         if (configMapper == null) {
             return null;
         }

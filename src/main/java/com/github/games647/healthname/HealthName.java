@@ -1,24 +1,19 @@
 package com.github.games647.healthname;
 
-import com.github.games647.healthname.config.Config;
 import com.github.games647.healthname.config.Settings;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
-import java.nio.file.Path;
-
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
+import java.util.Optional;
 
 import org.slf4j.Logger;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.config.DefaultConfig;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.critieria.Criteria;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
@@ -31,91 +26,57 @@ import org.spongepowered.api.text.format.TextColors;
         , url = PomData.URL, description = PomData.DESCRIPTION)
 public class HealthName {
 
-    private final PluginContainer pluginContainer;
     private final Logger logger;
-    private final Game game;
-
-    private Scoreboard globalScoreboard;
-
-    @Inject
-    @DefaultConfig(sharedRoot = true)
-    private Path defaultConfigFile;
+    private final Injector injector;
+    private final Settings configuration;
 
     @Inject
-    @DefaultConfig(sharedRoot = true)
-    private ConfigurationLoader<CommentedConfigurationNode> configManager;
-
-    private Settings configuration;
-
-    @Inject
-    public HealthName(Logger logger, PluginContainer pluginContainer, Game game) {
+    public HealthName(Logger logger, Injector injector, Settings settings) {
         this.logger = logger;
-        this.pluginContainer = pluginContainer;
-        this.game = game;
+        this.injector = injector;
+        this.configuration = settings;
     }
 
     @Listener //During this state, the plugin gets ready for initialization. Logger and config
     public void onPreInit(GamePreInitializationEvent preInitEvent) {
-        logger.info("Loading {} v{}", pluginContainer.getName(), pluginContainer.getVersion());
-
-        configuration = new Settings(configManager, defaultConfigFile, this);
         configuration.load();
     }
 
-    @Listener //During this state, the plugin should finish any work needed in order to be functional. Commands register + events
+    @Listener
+    //During this state, the plugin should finish any work needed in order to be functional. Commands register + events
     public void onInit(GameInitializationEvent initEvent) {
         //register events
-        game.getEventManager().registerListeners(this, new DamageListener(this));
-        game.getEventManager().registerListeners(this, new ConnectionListener(this));
+        Sponge.getEventManager().registerListeners(this, injector.getInstance(DamageListener.class));
+        Sponge.getEventManager().registerListeners(this, injector.getInstance(ConnectionListener.class));
     }
 
     @Listener
+    //Scoreboards are loaded when the world is loaded so load it here
     public void onGameStarted(GameStartedServerEvent gameStartedServerEvent) {
-        globalScoreboard = game.getServer().getServerScoreboard().get();
+        Optional<Scoreboard> serverScoreboard = Sponge.getServer().getServerScoreboard();
+        if (serverScoreboard.isPresent()) {
+            Scoreboard globalScoreboard = serverScoreboard.get();
+            if (configuration.getConfig().isNametagHealth()) {
+                globalScoreboard.getObjective(PomData.ARTIFACT_ID).ifPresent(globalScoreboard::removeObjective);
 
-        //Scoreboards are loaded when the world is loaded so load it here
-        if (getConfig().isNametagHealth()) {
-            globalScoreboard.getObjective(pluginContainer.getId()).ifPresent(globalScoreboard::removeObjective);
-
-            Objective objective = Objective.builder()
-                    .name(pluginContainer.getId())
-                    .displayName(Text.of(TextColors.DARK_RED, "Health"))
-                    .criterion(Criteria.DUMMY)
-                    .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)
-                    .build();
-            globalScoreboard.addObjective(objective);
-            globalScoreboard.updateDisplaySlot(objective, DisplaySlots.BELOW_NAME);
+                Objective objective = Objective.builder()
+                        .name(PomData.ARTIFACT_ID)
+                        .displayName(Text.of(TextColors.DARK_RED, "Health"))
+                        .criterion(Criteria.DUMMY)
+                        .objectiveDisplayMode(ObjectiveDisplayModes.INTEGER)
+                        .build();
+                globalScoreboard.addObjective(objective);
+                globalScoreboard.updateDisplaySlot(objective, DisplaySlots.BELOW_NAME);
+            }
+        } else {
+            logger.warn("Global scoreboard couldn't be loaded");
         }
     }
 
     @Listener
     public void onGameStarted(GameStoppingServerEvent gameStoppingServerEvent) {
-        if (globalScoreboard != null) {
-            globalScoreboard.getObjective(pluginContainer.getId()).ifPresent(globalScoreboard::removeObjective);
-        }
-    }
-
-    public Scoreboard getGlobalScoreboard() {
-        return globalScoreboard;
-    }
-
-    public Settings getConfigManager() {
-        return configuration;
-    }
-
-    public Config getConfig() {
-        return configuration.getConfiguration();
-    }
-
-    public PluginContainer getContainer() {
-        return pluginContainer;
-    }
-
-    public Logger getLogger() {
-        return logger;
-    }
-
-    public Game getGame() {
-        return game;
+        Sponge.getServer().getServerScoreboard()
+                .ifPresent(scoreboard -> scoreboard.getObjective(PomData.ARTIFACT_ID)
+                        .ifPresent(scoreboard::removeObjective));
     }
 }
