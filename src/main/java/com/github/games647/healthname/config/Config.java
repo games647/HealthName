@@ -10,7 +10,7 @@ public class Config {
     private boolean enabledMob = true;
 
     @Setting(comment = "Show the health of a player besides his nametag")
-    private boolean nametagHealth = false;
+    private boolean nametagHealth;
 
     @Setting(comment = "Show the health of a player under his nametag  (only the health number)")
     private boolean belowNameHealth = true;

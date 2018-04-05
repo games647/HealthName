@@ -2,7 +2,7 @@
 
 ### Description
 
-A Sponge minecraft server plugin for displaying the health above an entity.
+A Sponge Minecraft server plugin for displaying the health above an entity.
 This plugins makes it possible to display player or mob health above their character.
 
 ### Features

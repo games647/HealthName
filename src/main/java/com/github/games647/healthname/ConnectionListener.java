@@ -3,13 +3,10 @@ package com.github.games647.healthname;
 import com.github.games647.healthname.config.Settings;
 import com.google.inject.Inject;
 
-import java.util.Optional;
-
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
-import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.text.Text;
 
@@ -36,11 +33,9 @@ public class ConnectionListener {
     public void onQuit(ClientConnectionEvent.Disconnect disconnectEvent) {
         String playerName = disconnectEvent.getTargetEntity().getName();
         //Clean up scoreboard in order to prevent to big ones
-        Optional<Scoreboard> serverScoreboard = Sponge.getServer().getServerScoreboard();
-        if (serverScoreboard.isPresent()) {
-            Scoreboard globalScoreboard = serverScoreboard.get();
-            globalScoreboard.removeScores(Text.of(playerName));
-            globalScoreboard.getTeam(playerName).ifPresent(Team::unregister);
-        }
+        Sponge.getServer().getServerScoreboard().ifPresent(scoreboard -> {
+            scoreboard.removeScores(Text.of(playerName));
+            scoreboard.getTeam(playerName).ifPresent(Team::unregister);
+        });
     }
 }
